@@ -1,0 +1,17 @@
+services:
+  shopping-cart-service:
+    build:
+      context: .                           # 🛠️ ĐỔI THÀNH DẤU CHẤM
+      dockerfile: ./shopping-cart-service/Dockerfile.dev
+    container_name: nest-shopping-cart-dev
+    ports:
+      - "3001:3001"
+      - "9229:9229"
+    env_file:
+      - ../.env                             # 🛠️ ĐỔI THÀNH DẤU CHẤM (Lấy .env ở gốc)
+      - .env       # 🛠️ ĐỔI THÀNH ĐƯỜNG DẪN TỪ GỐC
+    volumes:
+      - .:/app                             # 🛠️ ĐỔI THÀNH .:/app (Mang toàn bộ thư mục gốc vào container)
+      - /app/node_modules
+      - /app/.pnpm-store
+    command: pnpm --filter shopping-cart-service start:dev

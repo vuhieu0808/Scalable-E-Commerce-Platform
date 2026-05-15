@@ -1,0 +1,5 @@
+version: '3.8'
+name: vuhieu
+
+include:
+  - path: shopping-cart-service/docker-compose.yml
