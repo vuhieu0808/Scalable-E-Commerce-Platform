@@ -3,3 +3,11 @@ name: vuhieu
 
 include:
   - path: ./shopping-cart-service/docker-compose.dev.yml
+
+networks:
+  vuhieu-network:
+    name: vuhieu-network
+
+volumes:
+  pnpm_store:
+    name: pnpm_store

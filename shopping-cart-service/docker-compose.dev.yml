@@ -1,17 +1,31 @@
 services:
   shopping-cart-service:
     build:
-      context: .                           # 🛠️ ĐỔI THÀNH DẤU CHẤM
-      dockerfile: ./shopping-cart-service/Dockerfile.dev
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        SHOPPING_CART_PORT: ${SHOPPING_CART_PORT:-3002}
+        NODE_ENV: development
+        
     container_name: nest-shopping-cart-dev
     ports:
-      - "3001:3001"
-      - "9229:9229"
+      - '${SHOPPING_CART_PORT:-3002}:${SHOPPING_CART_PORT:-3002}'
+    networks:
+      - vuhieu-network
     env_file:
-      - ../.env                             # 🛠️ ĐỔI THÀNH DẤU CHẤM (Lấy .env ở gốc)
-      - .env       # 🛠️ ĐỔI THÀNH ĐƯỜNG DẪN TỪ GỐC
+      - .env
     volumes:
-      - .:/app                             # 🛠️ ĐỔI THÀNH .:/app (Mang toàn bộ thư mục gốc vào container)
-      - /app/node_modules
-      - /app/.pnpm-store
+      - .:/app
+      - shopping_cart_node_modules:/app/node_modules
+      - pnpm_store:/pnpm/store
     command: pnpm --filter shopping-cart-service start:dev
+
+
+networks:
+  vuhieu-network:
+    name: vuhieu-network
+
+volumes:
+  shopping_cart_node_modules:
+  pnpm_store:
+    name: pnpm_store

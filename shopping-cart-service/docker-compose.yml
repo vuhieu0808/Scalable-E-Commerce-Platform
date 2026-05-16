@@ -1,0 +1,22 @@
+services:
+  shopping-cart-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: production
+        SHOPPING_CART_PORT: ${SHOPPING_CART_PORT:-3002}
+        
+    container_name: nest-shopping-cart
+    ports:
+      - '${SHOPPING_CART_PORT:-3002}:${SHOPPING_CART_PORT:-3002}'
+    networks:
+      - vuhieu-network
+    env_file:
+      - .env
+    command: ["node", "dist/main.js"]
+
+
+networks:
+  vuhieu-network:
+    name: vuhieu-network
