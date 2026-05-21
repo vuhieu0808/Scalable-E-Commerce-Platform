@@ -6,6 +6,7 @@ services:
       args:
         NODE_ENV: production
         SHOPPING_CART_PORT: ${SHOPPING_CART_PORT:-3002}
+        NGINX_PRIVATE_HTTP_URL: ${NGINX_PRIVATE_HTTP_URL:-http://nginx-private:8080}
         
     container_name: nest-shopping-cart
     ports:

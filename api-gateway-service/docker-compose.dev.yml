@@ -1,25 +1,25 @@
 services:
-  shopping-cart-service:
+  api-gateway-service:
     build:
       context: .
       dockerfile: Dockerfile.dev
       args:
-        SHOPPING_CART_PORT: ${SHOPPING_CART_PORT:-3002}
+        API_GATEWAY_PORT: ${API_GATEWAY_PORT:-3000}
         NGINX_PRIVATE_HTTP_URL: ${NGINX_PRIVATE_HTTP_URL:-http://nginx-private:8080}
         NODE_ENV: development
         
-    container_name: nest-shopping-cart-dev
+    container_name: nest-api-gateway-dev
     ports:
-      - '${SHOPPING_CART_PORT:-3002}:${SHOPPING_CART_PORT:-3002}'
+      - '${API_GATEWAY_PORT:-3000}:${API_GATEWAY_PORT:-3000}'
     networks:
       - vuhieu-network
-    env_file:
-      - .env
     volumes:
       - .:/app
-      - shopping_cart_node_modules:/app/node_modules
+      - api_gateway_node_modules:/app/node_modules
       - pnpm_store:/pnpm/store
-    command: pnpm --filter shopping-cart-service start:dev
+    command: pnpm --filter api-gateway-service start:dev
+    depends_on:
+      - shopping-cart-service
 
 
 networks:
@@ -27,6 +27,6 @@ networks:
     name: vuhieu-network
 
 volumes:
-  shopping_cart_node_modules:
+  api_gateway_node_modules:
   pnpm_store:
     name: pnpm_store

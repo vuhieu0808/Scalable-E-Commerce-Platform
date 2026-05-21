@@ -2,6 +2,8 @@ version: '3.8'
 name: vuhieu
 
 include:
+  - path: ./api-gateway-service/docker-compose.dev.yml
+  - path: ./nginx/docker-compose.dev.yml
   - path: ./shopping-cart-service/docker-compose.dev.yml
 
 networks:

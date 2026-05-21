@@ -1,0 +1,34 @@
+services:
+  nginx-public:
+    build:
+      context: .
+      dockerfile: nginx-public/Dockerfile.dev
+      args:
+        NGINX_PORT_PUBLIC: ${NGINX_PORT_PUBLIC:-80}
+    container_name: nginx-public-dev
+    ports:
+      - '${NGINX_PORT_PUBLIC:-80}:${NGINX_PORT_PUBLIC:-80}'
+    networks:
+      - vuhieu-network
+    depends_on:
+      - api-gateway-service
+      - shopping-cart-service
+
+  nginx-private:
+    build:
+      context: .
+      dockerfile: nginx-private/Dockerfile.dev
+      args:
+        NGINX_PORT_PRIVATE: ${NGINX_PORT_PRIVATE:-8080}
+    container_name: nginx-private-dev
+    ports:
+      - '${NGINX_PORT_PRIVATE:-8080}:${NGINX_PORT_PRIVATE:-8080}'
+    networks:
+      - vuhieu-network
+    depends_on:
+    - api-gateway-service
+    - shopping-cart-service
+
+networks:
+  vuhieu-network:
+    name: vuhieu-network

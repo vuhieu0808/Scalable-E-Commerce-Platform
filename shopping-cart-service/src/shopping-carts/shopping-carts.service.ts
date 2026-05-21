@@ -1,26 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import { CreateShoppingCartDto } from './dto/create-shopping-cart.dto';
 import { UpdateShoppingCartDto } from './dto/update-shopping-cart.dto';
+import { ShoppingCart } from './schemas/shopping-cart.schema';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class ShoppingCartsService {
-  create(createShoppingCartDto: CreateShoppingCartDto) {
-    return 'This action adds a new shoppingCart';
+  constructor(
+    @InjectModel(ShoppingCart.name)
+    private readonly shoppingCartModel: Model<ShoppingCart>,
+  ) {}
+
+  async createItem(createShoppingCartDto: CreateShoppingCartDto) {
+    return await new this.shoppingCartModel(createShoppingCartDto).save();
   }
 
-  findAll() {
-    return `This action returns all shoppingCarts`;
+  async findByUserId(userId: string) {
+    return await this.shoppingCartModel.find({ userId: userId });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} shoppingCart`;
+  async updateQuantity(id: string, updateShoppingCartDto: UpdateShoppingCartDto) {
+    return await this.shoppingCartModel.findByIdAndUpdate(
+      { _id: id },
+      updateShoppingCartDto,
+      { new: true },
+    );
   }
 
-  update(id: number, updateShoppingCartDto: UpdateShoppingCartDto) {
-    return `This action updates a #${id} shoppingCart`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} shoppingCart`;
+  async removeItem(id: string) {
+    return await this.shoppingCartModel.findByIdAndDelete(id);
   }
 }
