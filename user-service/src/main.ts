@@ -12,9 +12,9 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  
-  const port = process.env.PORT || 3000;
+
+  const port = process.env.PORT || 3003;
   await app.listen(port);
-  console.log(`API Gateway Service is running on port ${port}`);
+  console.log(`User Service is running on port ${port}`);
 }
 bootstrap();

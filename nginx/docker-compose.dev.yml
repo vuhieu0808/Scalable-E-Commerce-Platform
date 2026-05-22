@@ -13,6 +13,7 @@ services:
     depends_on:
       - api-gateway-service
       - shopping-cart-service
+      - user-service
 
   nginx-private:
     build:

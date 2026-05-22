@@ -1,7 +1,15 @@
-import { Controller, Get, Post, Put } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { ShoppingCartsService } from './shopping-carts.service';
 import { CreateShoppingCartDto } from './dto/create-shopping-cart.dto';
+import { AddNewShoppingCartDto } from './dto/add-new-shopping-cart.dto';
 import { UpdateShoppingCartDto } from './dto/update-shopping-cart.dto';
 
 @Controller('api/shopping-carts')
@@ -13,26 +21,34 @@ export class ShoppingCartsController {
     return { status: 'OK' };
   }
 
-  @MessagePattern('createShoppingCart')
-  create(@Payload() createShoppingCartDto: CreateShoppingCartDto) {
-    return this.shoppingCartsService.createItem(createShoppingCartDto);
+  @Post()
+  createShoppingCart(@Body() createShoppingCartDto: CreateShoppingCartDto) {
+    return this.shoppingCartsService.createShoppingCart(createShoppingCartDto);
   }
 
-  @MessagePattern('findByUserIdShoppingCart')
-  findByUserId(@Payload() userId: string) {
-    return this.shoppingCartsService.findByUserId(userId);
+  @Post('items')
+  addNewShoppingCart(@Body() addNewShoppingCartDto: AddNewShoppingCartDto) {
+    return this.shoppingCartsService.addNewShoppingCart(addNewShoppingCartDto);
   }
 
-  @MessagePattern('updateShoppingCart')
-  update(@Payload() updateShoppingCartDto: UpdateShoppingCartDto) {
-    return this.shoppingCartsService.updateQuantity(
-      updateShoppingCartDto._id,
+  @Get('user/:userId')
+  findShoppingCartByUserId(@Param('userId') userId: string) {
+    return this.shoppingCartsService.findShoppingCartByUserId(userId);
+  }
+
+  @Put('user/:userId')
+  updateShoppingCart(
+    @Param('userId') userId: string,
+    @Body() updateShoppingCartDto: UpdateShoppingCartDto,
+  ) {
+    return this.shoppingCartsService.updateShoppingCartByUserId(
+      userId,
       updateShoppingCartDto,
     );
   }
 
-  @MessagePattern('removeShoppingCart')
-  remove(@Payload() id: string) {
-    return this.shoppingCartsService.removeItem(id);
+  @Delete('user/:userId')
+  removeShoppingCart(@Param('userId') userId: string) {
+    return this.shoppingCartsService.removeShoppingCartByUserId(userId);
   }
 }

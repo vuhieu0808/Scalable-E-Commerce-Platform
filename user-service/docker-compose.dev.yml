@@ -1,26 +1,25 @@
 services:
-  api-gateway-service:
+  user-service:
     build:
       context: .
       dockerfile: Dockerfile.dev
       args:
-        API_GATEWAY_PORT: ${API_GATEWAY_PORT:-3000}
+        USER_PORT: ${USER_SERVICE_PORT:-3003}
         NGINX_PRIVATE_HTTP_URL: ${NGINX_PRIVATE_HTTP_URL:-http://nginx-private:8080}
         NODE_ENV: development
         
-    container_name: nest-api-gateway-dev
+    container_name: nest-user-dev
     ports:
-      - '${API_GATEWAY_PORT:-3000}:${API_GATEWAY_PORT:-3000}'
+      - '${USER_SERVICE_PORT:-3003}:${USER_SERVICE_PORT:-3003}'
     networks:
       - vuhieu-network
+    env_file:
+      - .env
     volumes:
       - .:/app
-      - api_gateway_node_modules:/app/node_modules
+      - user_node_modules:/app/node_modules
       - pnpm_store:/pnpm/store
-    command: pnpm --filter api-gateway-service start:dev
-    depends_on:
-      - shopping-cart-service
-      - user-service
+    command: pnpm --filter user-service start:dev
 
 
 networks:
@@ -28,6 +27,6 @@ networks:
     name: vuhieu-network
 
 volumes:
-  api_gateway_node_modules:
+  user_node_modules:
   pnpm_store:
     name: pnpm_store

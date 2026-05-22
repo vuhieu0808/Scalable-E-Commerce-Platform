@@ -1,17 +1,11 @@
-import { IsMongoId, IsNotEmpty } from 'class-validator';
+import { IsArray, IsNotEmpty, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreateShoppingCartDto, ShoppingCartItemDto } from './create-shopping-cart.dto';
+import { ShoppingCartItemDto } from './add-new-shopping-cart.dto';
 
 export class UpdateShoppingCartDto {
-  @IsMongoId({ message: 'Shopping Cart ID must be a valid MongoDB ID' })
-  @IsNotEmpty({ message: 'Shopping Cart ID is required' })
-  _id!: string;
-
-  @IsMongoId({ message: 'User ID must be a valid MongoDB ID' })
-  @IsNotEmpty({ message: 'User ID is required' })
-  userId!: string;
-
-  @IsNotEmpty({ message: 'Item is required' })
+  @IsArray({ message: 'Items must be an array' })
+  @IsNotEmpty({ message: 'Items are required' })
+  @ValidateNested({ each: true })
   @Type(() => ShoppingCartItemDto)
-  item!: ShoppingCartItemDto;
+  items!: ShoppingCartItemDto[];
 }
