@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -81,6 +82,10 @@ export class UserService {
   }
 
   async findUserById(id: string): Promise<SafeUserDto> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid user id');
+    }
+
     const user = await this.userModel.findById(id);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -94,6 +99,10 @@ export class UserService {
     id: string,
     updateUserDto: UpdateUserDto,
   ): Promise<SafeUserDto> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid user id');
+    }
+
     const updatedUser = await this.userModel.findByIdAndUpdate(
       id,
       updateUserDto,
@@ -111,6 +120,10 @@ export class UserService {
   }
 
   async deleteUserById(id: string): Promise<SafeUserDto> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid user id');
+    }
+
     const deletedUser = await this.userModel.findByIdAndDelete(id);
 
     if (!deletedUser) {
