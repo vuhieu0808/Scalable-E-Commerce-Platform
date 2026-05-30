@@ -24,11 +24,6 @@ export class User {
   @Prop()
   phoneNumber?: string;
 
-  // reference to the user's cart
-
-  @Prop({ type: Types.ObjectId })
-  cartId?: Types.ObjectId;
-
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

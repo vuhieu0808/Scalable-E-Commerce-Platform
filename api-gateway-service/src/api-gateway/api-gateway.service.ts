@@ -4,12 +4,12 @@ import {
   AddShoppingCartItemRequestDto,
   CreateShoppingCartRequestDto,
   UpdateShoppingCartRequestDto,
-} from './dto/shopping-cart.dto';
+} from '../internal-svc/dto/request/shopping-cart.request.dto';
 import {
   SignInRequestDto,
   SignUpRequestDto,
   UpdateUserRequestDto,
-} from './dto/user.dto';
+} from '../internal-svc/dto/request/user.request.dto';
 
 @Injectable()
 export class ApiGatewayService {
@@ -69,7 +69,11 @@ export class ApiGatewayService {
     return this.internalSVCService.removeShoppingCartByUserId(userId);
   }
 
-  async checkHealth() {
-    return this.internalSVCService.checkHealth();
+  async checkHealthForShoppingCart() {
+    return this.internalSVCService.checkHealthForShoppingCart();
+  }
+
+  async checkHealthForUser() {
+    return this.internalSVCService.checkHealthForUser();
   }
 }

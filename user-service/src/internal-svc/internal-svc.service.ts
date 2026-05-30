@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { BadGatewayException, HttpException, Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 import {
   CreateShoppingCartRequestDto,
   InternalRequestOptionsDto,
@@ -10,8 +12,24 @@ import {
 
 @Injectable()
 export class InternalSVCService {
+  constructor(private readonly httpService: HttpService) {}
+
   private readonly internalBaseUrl =
     process.env.NGINX_PRIVATE_HTTP_URL ?? 'http://nginx-private:8080';
+
+  private parseResponseBody(responseBody: string): unknown {
+    const trimmedBody = responseBody.trim();
+
+    if (!trimmedBody) {
+      return undefined;
+    }
+
+    try {
+      return JSON.parse(responseBody) as unknown;
+    } catch {
+      return responseBody;
+    }
+  }
 
   private async request<TResponse>(
     path: string,
@@ -21,23 +39,36 @@ export class InternalSVCService {
       ? this.internalBaseUrl
       : `${this.internalBaseUrl}/`;
     const requestUrl = new URL(path.replace(/^\//, ''), baseUrl);
-    const response = await fetch(requestUrl, {
-      method: options.method ?? 'GET',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body:
-        options.body === undefined ? undefined : JSON.stringify(options.body),
-    });
+    const response = (await firstValueFrom(
+      this.httpService.request<string>({
+        method: options.method ?? 'GET',
+        url: requestUrl.toString(),
+        data: options.body,
+        responseType: 'text',
+        validateStatus: () => true,
+      }),
+    )) as {
+      status: number;
+      statusText: string;
+      data: string;
+    };
 
-    if (!response.ok) {
-      const responseText = await response.text();
-      throw new Error(
-        `Internal service request failed (${response.status} ${response.statusText}) for ${requestUrl.toString()}: ${responseText}`,
+    const responseBody = this.parseResponseBody(response.data);
+
+    if (response.status < 200 || response.status >= 300) {
+      throw new HttpException(
+        responseBody ?? response.statusText,
+        response.status,
       );
     }
 
-    return (await response.json()) as TResponse;
+    if (responseBody === undefined) {
+      throw new BadGatewayException(
+        `Internal service returned an empty response for ${requestUrl.toString()}`,
+      );
+    }
+
+    return responseBody as TResponse;
   }
 
   async checkHealth(): Promise<HealthCheckResponseDto> {

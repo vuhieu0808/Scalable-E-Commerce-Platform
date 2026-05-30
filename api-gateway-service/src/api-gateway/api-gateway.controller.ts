@@ -12,20 +12,33 @@ import {
   AddShoppingCartItemRequestDto,
   CreateShoppingCartRequestDto,
   UpdateShoppingCartRequestDto,
-} from './dto/shopping-cart.dto';
+} from '../internal-svc/dto/request/shopping-cart.request.dto';
 import {
   SignInRequestDto,
   SignUpRequestDto,
   UpdateUserRequestDto,
-} from './dto/user.dto';
+} from '../internal-svc/dto/request/user.request.dto';
 
 @Controller('api-gateway')
 export class ApiGatewayController {
   constructor(private readonly apiGatewayService: ApiGatewayService) {}
 
+  // User Endpoints
+
   @Post('users/sign-up')
-  signUp(@Body() signUpRequestDto: SignUpRequestDto) {
-    return this.apiGatewayService.signUpUser(signUpRequestDto);
+  async signUp(@Body() signUpRequestDto: SignUpRequestDto) {
+    const user = await this.apiGatewayService.signUpUser(signUpRequestDto);
+
+    await this.apiGatewayService.createShoppingCart({
+      userId: user._id,
+    });
+
+    return user;
+  }
+
+  @Get('users/health')
+  async checkHealthForUser() {
+    return this.apiGatewayService.checkHealthForUser();
   }
 
   @Post('users/sign-in')
@@ -51,14 +64,21 @@ export class ApiGatewayController {
     return this.apiGatewayService.deleteUserById(id);
   }
 
-  @Post('shopping-carts')
-  createShoppingCart(
-    @Body() createShoppingCartRequestDto: CreateShoppingCartRequestDto,
-  ) {
-    return this.apiGatewayService.createShoppingCart(
-      createShoppingCartRequestDto,
-    );
+  // Shopping Cart Endpoints
+
+  @Get('shopping-carts/health')
+  async checkHealthForShoppingCart() {
+    return this.apiGatewayService.checkHealthForShoppingCart();
   }
+
+  // @Post('shopping-carts')
+  // createShoppingCart(
+  //   @Body() createShoppingCartRequestDto: CreateShoppingCartRequestDto,
+  // ) {
+  //   return this.apiGatewayService.createShoppingCart(
+  //     createShoppingCartRequestDto,
+  //   );
+  // }
 
   @Get('shopping-carts/user/:userId')
   findShoppingCartByUserId(@Param('userId') userId: string) {

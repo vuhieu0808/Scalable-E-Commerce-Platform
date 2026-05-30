@@ -46,15 +46,7 @@ export class UserService {
     }).save();
 
     try {
-      const createdShoppingCart: CreateShoppingCartResponseDto =
-        await this.internalSVCService.createShoppingCart(
-          createdUser._id.toString(),
-        );
-      const cartObjectId = new Types.ObjectId(createdShoppingCart._id);
-      createdUser.cartId = cartObjectId;
-
-      const updatedUser = await createdUser.save();
-      const safeUser = this.toSafeUser(updatedUser);
+      const safeUser = this.toSafeUser(createdUser);
       return safeUser;
     } catch (error) {
       await this.userModel.findByIdAndDelete(createdUser._id);

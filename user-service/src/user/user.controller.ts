@@ -16,6 +16,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get('health')
+  async health() {
+    return { status: 'OK' };
+  }
+
   @Post('sign-up')
   async signUp(@Body() createUserDto: CreateUserDto) {
     const user = await this.userService.signUp(createUserDto);

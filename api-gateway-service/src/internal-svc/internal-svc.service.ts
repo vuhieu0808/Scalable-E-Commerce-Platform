@@ -1,28 +1,50 @@
 import { BadGatewayException, HttpException, Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 import {
   AddShoppingCartItemRequestDto,
   CreateShoppingCartRequestDto,
   UpdateShoppingCartRequestDto,
-} from '../api-gateway/dto/shopping-cart.dto';
+} from './dto/request/shopping-cart.request.dto';
 import {
   SignInRequestDto,
   SignUpRequestDto,
   UpdateUserRequestDto,
-} from '../api-gateway/dto/user.dto';
+} from './dto/request/user.request.dto';
+import { HealthCheckResponseDto } from './dto/response/health-check.response.dto';
+import { UserResponseDto } from './dto/response/user.response.dto';
 
 type InternalRequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
 };
 
-type HealthCheckResult = {
-  status: string;
+type InternalHttpResponse = {
+  status: number;
+  statusText: string;
+  data: string;
 };
 
 @Injectable()
 export class InternalSVCService {
+  constructor(private readonly httpService: HttpService) {}
+
   private readonly internalBaseUrl =
     process.env.NGINX_PRIVATE_HTTP_URL ?? 'http://nginx-private:8080';
+
+  private parseResponseBody(responseBody: string): unknown {
+    const trimmedBody = responseBody.trim();
+
+    if (!trimmedBody) {
+      return undefined;
+    }
+
+    try {
+      return JSON.parse(responseBody) as unknown;
+    } catch {
+      return responseBody;
+    }
+  }
 
   private formatRequestPath(requestUrl: URL): string {
     return requestUrl.pathname.replace(/^\/api\//, '').replace(/^\//, '');
@@ -36,54 +58,48 @@ export class InternalSVCService {
       ? this.internalBaseUrl
       : `${this.internalBaseUrl}/`;
     const requestUrl = new URL(path.replace(/^\//, ''), baseUrl);
-    const response = await fetch(requestUrl, {
-      method: options.method ?? 'GET',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body:
-        options.body === undefined ? undefined : JSON.stringify(options.body),
-    });
+    const response = (await firstValueFrom(
+      this.httpService.request<string>({
+        method: options.method ?? 'GET',
+        url: requestUrl.toString(),
+        data: options.body,
+        responseType: 'text',
+        validateStatus: () => true,
+      }),
+    )) as InternalHttpResponse;
 
-    if (!response.ok) {
-      const responseText = await response.text();
-      let responseBody: string | Record<string, any> = responseText;
+    const responseBody = this.parseResponseBody(response.data);
 
-      try {
-        const parsedBody: unknown = JSON.parse(responseText);
-        if (parsedBody !== null && typeof parsedBody === 'object') {
-          responseBody = parsedBody as Record<string, any>;
-        }
-      } catch {
-        // keep plain text body when the upstream response is not JSON
-      }
-
-      throw new HttpException(responseBody, response.status);
+    if (response.status < 200 || response.status >= 300) {
+      throw new HttpException(
+        responseBody ?? response.statusText,
+        response.status,
+      );
     }
 
-    const responseText = await response.text();
-
-    if (!responseText.trim()) {
+    if (responseBody === undefined) {
       throw new BadGatewayException(
         `Internal service returned an empty response for ${this.formatRequestPath(requestUrl)}`,
       );
     }
 
-    try {
-      return JSON.parse(responseText) as TResponse;
-    } catch {
-      return responseText as TResponse;
-    }
+    return responseBody as TResponse;
   }
 
-  async checkHealth(): Promise<HealthCheckResult> {
-    return this.request<HealthCheckResult>('/api/shopping-carts/health', {
+  async checkHealthForShoppingCart(): Promise<HealthCheckResponseDto> {
+    return this.request<HealthCheckResponseDto>('/api/shopping-carts/health', {
       method: 'GET',
     });
   }
 
-  signUpUser(signUpRequestDto: SignUpRequestDto) {
-    return this.request('/api/users/sign-up', {
+  async checkHealthForUser(): Promise<HealthCheckResponseDto> {
+    return this.request<HealthCheckResponseDto>('/api/users/health', {
+      method: 'GET',
+    });
+  }
+
+  signUpUser(signUpRequestDto: SignUpRequestDto): Promise<UserResponseDto> {
+    return this.request<UserResponseDto>('/api/users/sign-up', {
       method: 'POST',
       body: signUpRequestDto,
     });
