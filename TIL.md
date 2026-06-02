@@ -39,3 +39,21 @@ Bỏ toàn bộ dấu gạch chéo (`/`) ở cuối cả đường dẫn `locati
 
 - **Quy tắc so khớp của Nginx:** `location` không có dấu `/` ở cuối hoạt động như một *Prefix Match*, nó bao sân được cả 2 trường hợp client gọi có hoặc không có dấu `/`.
 - **Cơ chế** `proxy_pass`**:** Khi `proxy_pass` KHÔNG có dấu `/` ở cuối, Nginx sẽ bê nguyên vẹn (nguyên văn) cái URI mà client gửi lên để đẩy vào Backend (Node.js/NestJS), giúp tránh việc code Backend bị nhận sai Endpoint do Nginx tự ý cắt gọt.
+
+## ⚙️ Khởi tạo Product Catalog Service bằng NestJS CLI
+
+### 1. Lệnh tạo project service mới
+
+```bash
+pnpm dlx @nestjs/cli new product-catalog-service
+```
+
+- **Mục đích sử dụng:** Tạo nhanh một project NestJS mới tên `product-catalog-service` mà không cần cài Nest CLI global. Lệnh này sinh ra cấu trúc thư mục chuẩn (module, main, config, scripts) để bắt đầu service độc lập trong kiến trúc microservices.
+
+### 2. Lệnh sinh resource Product Catalog
+
+```bash
+pnpm exec nest g resource product-catalog --no-spec
+```
+
+- **Mục đích sử dụng:** Sinh bộ khung resource `product-catalog` (module, controller, service, DTO, entity) trong project hiện tại để triển khai CRUD nhanh hơn. Tùy chọn `--no-spec` giúp bỏ qua file test, phù hợp khi muốn tập trung dựng API trước.

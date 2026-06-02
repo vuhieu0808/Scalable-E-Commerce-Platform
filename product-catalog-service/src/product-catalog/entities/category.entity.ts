@@ -15,10 +15,10 @@ export class Category {
   id!: string;
 
   @Index({ unique: true })
-  @Column({ type: 'varchar', length: 150 })
+  @Column({ type: 'nvarchar', length: 150 })
   name!: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'ntext', nullable: true })
   description?: string | null;
 
   @OneToMany(() => Product, (product) => product.category)

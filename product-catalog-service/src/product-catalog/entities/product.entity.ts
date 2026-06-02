@@ -15,14 +15,14 @@ export class Product {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'varchar', length: 200 })
+  @Column({ type: 'nvarchar', length: 200 })
   name!: string;
 
   @Index({ unique: true })
-  @Column({ type: 'varchar', length: 120 })
+  @Column({ type: 'nvarchar', length: 120 })
   sku!: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'ntext', nullable: true })
   description?: string | null;
 
   @Column({ type: 'decimal', precision: 12, scale: 2 })
