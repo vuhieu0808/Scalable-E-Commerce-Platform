@@ -11,8 +11,17 @@ services:
     container_name: nest-shopping-cart-dev
     ports:
       - '${SHOPPING_CART_PORT:-3002}:${SHOPPING_CART_PORT:-3002}'
+    depends_on:
+      - postgres-sql
     networks:
       - vuhieu-network
+    environment:
+      DATABASE_HOST: postgres-sql
+      DATABASE_PORT: 5432
+      DATABASE_NAME: shopping_cart_service
+      DATABASE_USERNAME: shopping_cart_user
+      DATABASE_PASSWORD: shopping_cart_password
+      DATABASE_SYNC: true
     env_file:
       - .env
     volumes:

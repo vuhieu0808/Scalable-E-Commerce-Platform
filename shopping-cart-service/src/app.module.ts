@@ -1,14 +1,24 @@
 import { Module } from '@nestjs/common';
 import { ShoppingCartsModule } from './shopping-carts/shopping-carts.module';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [ShoppingCartsModule,
+  imports: [
+    ShoppingCartsModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/shopping-cart')
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DATABASE_HOST ?? 'localhost',
+      port: Number(process.env.DATABASE_PORT ?? 5432),
+      username: process.env.DATABASE_USERNAME ?? 'postgres',
+      password: process.env.DATABASE_PASSWORD ?? 'postgres',
+      database: process.env.DATABASE_NAME ?? 'shopping_cart_service',
+      autoLoadEntities: true,
+      synchronize: process.env.DATABASE_SYNC === 'true',
+    }),
   ],
 })
 export class AppModule {}

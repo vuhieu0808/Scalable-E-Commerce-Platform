@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chào mừng đến với hệ thống</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #4CAF50;
+        }
+        .header h1 {
+            color: #4CAF50;
+            margin: 0;
+            font-size: 32px;
+        }
+        .content {
+            padding: 30px 0;
+        }
+        .content h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .content p {
+            color: #666;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        .highlight {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .button {
+            display: inline-block;
+            padding: 15px 40px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid #ddd;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Chào Mừng!</h1>
+        </div>
+
+        <div class="content">
+            <h2>Xin chào {{userName}}!</h2>
+
+            <p>Chúng tôi rất vui mừng chào đón bạn đến với <span class="highlight">Scalable E-Commerce Platform</span>!</p>
+
+            <p>Tài khoản của bạn đã được tạo thành công với email: <span class="highlight">{{userEmail}}</span></p>
+
+            <p>Bây giờ bạn có thể:</p>
+            <ul>
+                <li>Khám phá hàng nghìn sản phẩm chất lượng</li>
+                <li>Thêm sản phẩm vào giỏ hàng</li>
+                <li>Theo dõi đơn hàng của bạn</li>
+                <li>Nhận thông báo về các khuyến mãi đặc biệt</li>
+            </ul>
+
+            <center>
+                <a href="{{loginUrl}}" class="button">Đăng Nhập Ngay</a>
+            </center>
+
+            <p>Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi.</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Scalable E-Commerce Platform. All rights reserved.</p>
+            <p>Email này được gửi tự động, vui lòng không trả lời.</p>
+        </div>
+    </div>
+</body>
+</html>

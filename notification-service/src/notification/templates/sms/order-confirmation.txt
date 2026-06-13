@@ -1,0 +1,1 @@
+Don hang #{{orderId}} da duoc xac nhan! Tong gia tri: {{totalAmount}} VND. Xem chi tiet: {{orderUrl}}

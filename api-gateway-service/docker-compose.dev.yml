@@ -6,6 +6,7 @@ services:
       args:
         API_GATEWAY_PORT: ${API_GATEWAY_PORT:-3000}
         NGINX_PRIVATE_HTTP_URL: ${NGINX_PRIVATE_HTTP_URL:-http://nginx-private:8080}
+        RABBITMQ_URL: ${RABBITMQ_URL:-amqp://guest:guest@rabbitmq:5672}
         NODE_ENV: development
         
     container_name: nest-api-gateway-dev

@@ -2,37 +2,35 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
+import { isUUID } from 'class-validator';
+import { Not, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User, UserDocument } from './schemas/user.schema';
-import { Model, Types } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
-import * as bcrypt from 'bcrypt';
-import { InternalSVCService } from '../internal-svc/internal-svc.service';
-import { CreateShoppingCartResponseDto } from '../internal-svc/dto/internal-svc-response.dto';
+import { User } from './entities/user.entity';
 import { SafeUserDto } from './dto/user-response.dto';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-    private readonly internalSVCService: InternalSVCService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
-  private toSafeUser(user: UserDocument): SafeUserDto {
-    const { hashedPassword: _, ...safeUser } = user.toObject();
+  private toSafeUser(user: User): SafeUserDto {
+    const { hashedPassword: _, ...safeUser } = user;
     return safeUser;
   }
 
   async signUp(createUserDto: CreateUserDto): Promise<SafeUserDto> {
     const { email, password } = createUserDto;
 
-    const userExists = await this.userModel.findOne({ email });
+    const userExists = await this.userRepository.findOne({ where: { email } });
     if (userExists) {
       throw new ConflictException('User already exists');
     }
@@ -40,26 +38,20 @@ export class UserService {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const createdUser = await new this.userModel({
-      email,
-      hashedPassword,
-    }).save();
+    const createdUser = await this.userRepository.save(
+      this.userRepository.create({
+        email,
+        hashedPassword,
+      }),
+    );
 
-    try {
-      const safeUser = this.toSafeUser(createdUser);
-      return safeUser;
-    } catch (error) {
-      await this.userModel.findByIdAndDelete(createdUser._id);
-      throw new InternalServerErrorException(
-        'Error occurred while creating user',
-      );
-    }
+    return this.toSafeUser(createdUser);
   }
 
   async signIn(signInDto: SignInDto): Promise<SafeUserDto> {
     const { email, password } = signInDto;
 
-    const user = await this.userModel.findOne({ email });
+    const user = await this.userRepository.findOne({ where: { email } });
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -74,11 +66,11 @@ export class UserService {
   }
 
   async findUserById(id: string): Promise<SafeUserDto> {
-    if (!Types.ObjectId.isValid(id)) {
+    if (!isUUID(id)) {
       throw new BadRequestException('Invalid user id');
     }
 
-    const user = await this.userModel.findById(id);
+    const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -91,36 +83,49 @@ export class UserService {
     id: string,
     updateUserDto: UpdateUserDto,
   ): Promise<SafeUserDto> {
-    if (!Types.ObjectId.isValid(id)) {
+    if (!isUUID(id)) {
       throw new BadRequestException('Invalid user id');
     }
 
-    const updatedUser = await this.userModel.findByIdAndUpdate(
-      id,
-      updateUserDto,
-      {
-        new: true,
-      },
-    );
-
-    if (!updatedUser) {
+    const existingUser = await this.userRepository.findOne({ where: { id } });
+    if (!existingUser) {
       throw new NotFoundException('User not found');
     }
+
+    if (updateUserDto.email && updateUserDto.email !== existingUser.email) {
+      const duplicateUser = await this.userRepository.findOne({
+        where: {
+          email: updateUserDto.email,
+          id: Not(id),
+        },
+      });
+
+      if (duplicateUser) {
+        throw new ConflictException('User already exists');
+      }
+    }
+
+    const updatedUser = await this.userRepository.save({
+      ...existingUser,
+      ...updateUserDto,
+    });
 
     const safeUser = this.toSafeUser(updatedUser);
     return safeUser;
   }
 
   async deleteUserById(id: string): Promise<SafeUserDto> {
-    if (!Types.ObjectId.isValid(id)) {
+    if (!isUUID(id)) {
       throw new BadRequestException('Invalid user id');
     }
 
-    const deletedUser = await this.userModel.findByIdAndDelete(id);
+    const deletedUser = await this.userRepository.findOne({ where: { id } });
 
     if (!deletedUser) {
       throw new NotFoundException('User not found');
     }
+
+    await this.userRepository.remove(deletedUser);
 
     const safeUser = this.toSafeUser(deletedUser);
     return safeUser;

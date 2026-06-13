@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác thực email</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #9C27B0;
+        }
+        .header h1 {
+            color: #9C27B0;
+            margin: 0;
+            font-size: 32px;
+        }
+        .content {
+            padding: 30px 0;
+        }
+        .content h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .content p {
+            color: #666;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        .verification-code {
+            background-color: #f3e5f5;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .verification-code h3 {
+            color: #9C27B0;
+            font-size: 36px;
+            margin: 0;
+            letter-spacing: 5px;
+        }
+        .highlight {
+            color: #9C27B0;
+            font-weight: bold;
+        }
+        .button {
+            display: inline-block;
+            padding: 15px 40px;
+            background-color: #9C27B0;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid #ddd;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📧 Xác Thực Email</h1>
+        </div>
+
+        <div class="content">
+            <h2>Xác nhận địa chỉ email của bạn</h2>
+
+            <p>Xin chào <span class="highlight">{{userName}}</span>,</p>
+
+            <p>Vui lòng xác thực địa chỉ email của bạn để hoàn tất đăng ký tài khoản.</p>
+
+            <p>Nhấn vào nút bên dưới để xác thực:</p>
+
+            <center>
+                <a href="{{verificationUrl}}" class="button">Xác Thực Email</a>
+            </center>
+
+            <p>Hoặc nhập mã xác thực sau:</p>
+
+            <div class="verification-code">
+                <h3>{{verificationCode}}</h3>
+            </div>
+
+            <p>Mã này có hiệu lực trong <span class="highlight">{{expiryMinutes}} phút</span>.</p>
+
+            <p>Nếu bạn không tạo tài khoản này, vui lòng bỏ qua email này.</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Scalable E-Commerce Platform. All rights reserved.</p>
+            <p>Email này được gửi tự động, vui lòng không trả lời.</p>
+        </div>
+    </div>
+</body>
+</html>

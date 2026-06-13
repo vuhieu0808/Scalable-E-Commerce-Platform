@@ -1,7 +1,7 @@
-import { IsMongoId, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsUUID } from 'class-validator';
 
 export class CreateShoppingCartDto {
-  @IsMongoId({ message: 'User ID must be a valid MongoDB ID' })
+  @IsUUID('4', { message: 'User ID must be a valid UUID' })
   @IsNotEmpty({ message: 'User ID is required' })
   userId!: string;
 }

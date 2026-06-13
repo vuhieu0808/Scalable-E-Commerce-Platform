@@ -10,10 +10,6 @@ export class UpdateUserDto {
   name?: string;
 
   @IsOptional()
-  @IsString({ message: 'Address must be a string' })
-  address?: string;
-
-  @IsOptional()
   @IsString({ message: 'Phone number must be a string' })
   phoneNumber?: string;
 }

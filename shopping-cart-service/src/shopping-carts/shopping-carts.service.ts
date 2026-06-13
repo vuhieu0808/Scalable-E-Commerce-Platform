@@ -2,90 +2,142 @@ import { Injectable } from '@nestjs/common';
 import { CreateShoppingCartDto } from './dto/create-shopping-cart.dto';
 import { AddNewShoppingCartDto } from './dto/add-new-shopping-cart.dto';
 import { UpdateShoppingCartDto } from './dto/update-shopping-cart.dto';
-import { ShoppingCart } from './schemas/shopping-cart.schema';
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ShoppingCart } from './entities/shopping-cart.entity';
+import { ShoppingCartItem } from './entities/shopping-cart-item.entity';
 
 @Injectable()
 export class ShoppingCartsService {
   constructor(
-    @InjectModel(ShoppingCart.name)
-    private readonly shoppingCartModel: Model<ShoppingCart>,
+    @InjectRepository(ShoppingCart)
+    private readonly shoppingCartRepository: Repository<ShoppingCart>,
+    @InjectRepository(ShoppingCartItem)
+    private readonly shoppingCartItemRepository: Repository<ShoppingCartItem>,
   ) {}
 
-  async createShoppingCart(createShoppingCartDto: CreateShoppingCartDto) {
-    const existingShoppingCart = await this.shoppingCartModel.findOne({
-      userId: createShoppingCartDto.userId,
+  private async findShoppingCartWithItemsByUserId(
+    userId: string,
+  ): Promise<ShoppingCart | null> {
+    return this.shoppingCartRepository.findOne({
+      where: { userId },
+      relations: { items: true },
     });
+  }
+
+  async createShoppingCart(
+    createShoppingCartDto: CreateShoppingCartDto,
+  ): Promise<ShoppingCart | null> {
+    const existingShoppingCart = await this.findShoppingCartWithItemsByUserId(
+      createShoppingCartDto.userId,
+    );
 
     if (existingShoppingCart) {
       return existingShoppingCart;
     }
 
-    const createdShoppingCart = await new this.shoppingCartModel({
-      userId: createShoppingCartDto.userId,
-      items: [],
-    }).save();
+    const createdShoppingCart = await this.shoppingCartRepository.save(
+      this.shoppingCartRepository.create({
+        userId: createShoppingCartDto.userId,
+        items: [],
+      }),
+    );
 
-    return createdShoppingCart;
+    return this.findShoppingCartWithItemsByUserId(createdShoppingCart.userId);
   }
 
-  async addNewShoppingCart(addNewShoppingCartDto: AddNewShoppingCartDto) {
-    const existingShoppingCart = await this.shoppingCartModel.findOne({
-      userId: addNewShoppingCartDto.userId,
-    });
+  async addNewShoppingCart(
+    addNewShoppingCartDto: AddNewShoppingCartDto,
+  ): Promise<ShoppingCart | null> {
+    const existingShoppingCart = await this.findShoppingCartWithItemsByUserId(
+      addNewShoppingCartDto.userId,
+    );
 
     if (!existingShoppingCart) {
-      const createdShoppingCart = await new this.shoppingCartModel({
-        userId: addNewShoppingCartDto.userId,
-        items: [addNewShoppingCartDto.item],
-      }).save();
+      const createdShoppingCart = await this.shoppingCartRepository.save(
+        this.shoppingCartRepository.create({
+          userId: addNewShoppingCartDto.userId,
+          items: [],
+        }),
+      );
 
-      return createdShoppingCart;
+      await this.shoppingCartItemRepository.save(
+        this.shoppingCartItemRepository.create({
+          productId: addNewShoppingCartDto.item.productId,
+          quantity: addNewShoppingCartDto.item.quantity,
+          shoppingCartId: createdShoppingCart.id,
+        }),
+      );
+
+      return this.findShoppingCartWithItemsByUserId(createdShoppingCart.userId);
     }
 
-    const existingItem = existingShoppingCart.items.find(
-      (item) =>
-        item.productId.toString() === addNewShoppingCartDto.item.productId,
+    const existingItem = existingShoppingCart.items?.find(
+      (item) => item.productId === addNewShoppingCartDto.item.productId,
     );
 
     if (existingItem) {
       existingItem.quantity += addNewShoppingCartDto.item.quantity;
+      await this.shoppingCartItemRepository.save(existingItem);
     } else {
-      existingShoppingCart.items.push(addNewShoppingCartDto.item as never);
+      await this.shoppingCartItemRepository.save(
+        this.shoppingCartItemRepository.create({
+          productId: addNewShoppingCartDto.item.productId,
+          quantity: addNewShoppingCartDto.item.quantity,
+          shoppingCartId: existingShoppingCart.id,
+        }),
+      );
     }
 
-    const updatedShoppingCart = await existingShoppingCart.save();
-
-    return updatedShoppingCart;
+    return this.findShoppingCartWithItemsByUserId(existingShoppingCart.userId);
   }
 
-  async findShoppingCartByUserId(userId: string) {
-    const shoppingCart = await this.shoppingCartModel.findOne({
-      userId: userId,
-    });
-
-    return shoppingCart;
+  async findShoppingCartByUserId(userId: string): Promise<ShoppingCart | null> {
+    return this.findShoppingCartWithItemsByUserId(userId);
   }
 
   async updateShoppingCartByUserId(
     userId: string,
     updateShoppingCartDto: UpdateShoppingCartDto,
-  ) {
-    const updatedShoppingCart = await this.shoppingCartModel.findOneAndUpdate(
-      { userId: userId },
-      { items: updateShoppingCartDto.items },
-      { new: true },
-    );
+  ): Promise<ShoppingCart | null> {
+    const shoppingCart = await this.findShoppingCartWithItemsByUserId(userId);
 
-    return updatedShoppingCart;
-  }
+    if (!shoppingCart) {
+      return null;
+    }
 
-  async removeShoppingCartByUserId(userId: string) {
-    const deletedShoppingCart = await this.shoppingCartModel.findOneAndDelete({
-      userId: userId,
+    await this.shoppingCartItemRepository.delete({
+      shoppingCartId: shoppingCart.id,
     });
 
-    return deletedShoppingCart;
+    await this.shoppingCartItemRepository.save(
+      updateShoppingCartDto.items.map((item) =>
+        this.shoppingCartItemRepository.create({
+          productId: item.productId,
+          quantity: item.quantity,
+          shoppingCartId: shoppingCart.id,
+        }),
+      ),
+    );
+
+    return this.findShoppingCartWithItemsByUserId(userId);
+  }
+
+  async removeShoppingCartByUserId(
+    userId: string,
+  ): Promise<ShoppingCart | null> {
+    const shoppingCart = await this.findShoppingCartWithItemsByUserId(userId);
+
+    if (!shoppingCart) {
+      return null;
+    }
+
+    await this.shoppingCartItemRepository.delete({
+      shoppingCartId: shoppingCart.id,
+    });
+
+    await this.shoppingCartRepository.remove(shoppingCart);
+
+    return shoppingCart;
   }
 }

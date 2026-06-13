@@ -1,6 +1,13 @@
-import { BadGatewayException, HttpException, Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  HttpException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { ClientProxy } from '@nestjs/microservices';
+import { randomUUID } from 'crypto';
 import {
   AddShoppingCartItemRequestDto,
   CreateShoppingCartRequestDto,
@@ -11,6 +18,7 @@ import {
   SignUpRequestDto,
   UpdateUserRequestDto,
 } from './dto/request/user.request.dto';
+import { SendNotificationRequestDto } from './dto/request/notification.request.dto';
 import { HealthCheckResponseDto } from './dto/response/health-check.response.dto';
 import { UserResponseDto } from './dto/response/user.response.dto';
 
@@ -27,7 +35,11 @@ type InternalHttpResponse = {
 
 @Injectable()
 export class InternalSVCService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    @Inject('NOTIFICATION_QUEUE_CLIENT')
+    private readonly notificationQueueClient: ClientProxy,
+  ) {}
 
   private readonly internalBaseUrl =
     process.env.NGINX_PRIVATE_HTTP_URL ?? 'http://nginx-private:8080';
@@ -168,6 +180,21 @@ export class InternalSVCService {
   removeShoppingCartByUserId(userId: string) {
     return this.request(`/api/shopping-carts/user/${userId}`, {
       method: 'DELETE',
+    });
+  }
+
+  async sendNotification(payload: SendNotificationRequestDto): Promise<void> {
+    await firstValueFrom(
+      this.notificationQueueClient.emit('send_notification', {
+        messageId: randomUUID(),
+        ...payload,
+      }),
+    );
+  }
+
+  async checkHealthForNotification(): Promise<HealthCheckResponseDto> {
+    return this.request<HealthCheckResponseDto>('/api/notifications/health', {
+      method: 'GET',
     });
   }
 }

@@ -10,6 +10,7 @@ import {
   SignUpRequestDto,
   UpdateUserRequestDto,
 } from '../internal-svc/dto/request/user.request.dto';
+import { SendNotificationRequestDto } from '../internal-svc/dto/request/notification.request.dto';
 
 @Injectable()
 export class ApiGatewayService {
@@ -67,6 +68,10 @@ export class ApiGatewayService {
 
   removeShoppingCartByUserId(userId: string) {
     return this.internalSVCService.removeShoppingCartByUserId(userId);
+  }
+
+  sendNotification(sendNotificationRequestDto: SendNotificationRequestDto) {
+    return this.internalSVCService.sendNotification(sendNotificationRequestDto);
   }
 
   async checkHealthForShoppingCart() {

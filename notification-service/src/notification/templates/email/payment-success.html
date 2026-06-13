@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán thành công</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #4CAF50;
+        }
+        .header h1 {
+            color: #4CAF50;
+            margin: 0;
+            font-size: 32px;
+        }
+        .content {
+            padding: 30px 0;
+        }
+        .content h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .content p {
+            color: #666;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        .payment-info {
+            background-color: #f1f8e9;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .payment-info p {
+            margin: 10px 0;
+        }
+        .highlight {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .button {
+            display: inline-block;
+            padding: 15px 40px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid #ddd;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Thanh Toán Thành Công!</h1>
+        </div>
+
+        <div class="content">
+            <h2>Giao dịch của bạn đã hoàn tất</h2>
+
+            <p>Xin chào <span class="highlight">{{userName}}</span>,</p>
+
+            <p>Chúng tôi đã nhận được thanh toán của bạn thành công!</p>
+
+            <div class="payment-info">
+                <p><strong>Mã giao dịch:</strong> <span class="highlight">{{transactionId}}</span></p>
+                <p><strong>Số tiền:</strong> <span class="highlight">{{amount}} VNĐ</span></p>
+                <p><strong>Phương thức:</strong> {{paymentMethod}}</p>
+                <p><strong>Thời gian:</strong> {{paymentTime}}</p>
+            </div>
+
+            <p>Đơn hàng của bạn đang được xử lý và sẽ sớm được giao.</p>
+
+            <center>
+                <a href="{{invoiceUrl}}" class="button">Xem Hóa Đơn</a>
+            </center>
+
+            <p>Cảm ơn bạn đã mua sắm tại cửa hàng của chúng tôi!</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Scalable E-Commerce Platform. All rights reserved.</p>
+            <p>Email này được gửi tự động, vui lòng không trả lời.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1 @@
+Chao mung {{userName}} den voi Scalable E-Commerce Platform! Tai khoan cua ban da duoc tao thanh cong. Dang nhap ngay tai: {{loginUrl}}

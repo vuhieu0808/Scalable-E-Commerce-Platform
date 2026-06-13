@@ -11,8 +11,17 @@ services:
     container_name: nest-user-dev
     ports:
       - '${USER_SERVICE_PORT:-3003}:${USER_SERVICE_PORT:-3003}'
+    depends_on:
+      - postgres-sql
     networks:
       - vuhieu-network
+    environment:
+      DATABASE_HOST: postgres-sql
+      DATABASE_PORT: 5432
+      DATABASE_NAME: user_service
+      DATABASE_USERNAME: user_service_user
+      DATABASE_PASSWORD: user_service_password
+      DATABASE_SYNC: true
     env_file:
       - .env
     volumes:

@@ -1,0 +1,1 @@
+Don hang #{{orderId}} dang tren duong giao! Ma van don: {{trackingNumber}}. Du kien giao: {{estimatedDelivery}}. Theo doi: {{trackingUrl}}

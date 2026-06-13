@@ -1,17 +1,4 @@
 services:
-  product-catalog-postgres:
-    image: postgres:16-alpine
-    container_name: product-catalog-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DATABASE_NAME_PRODUCT_CATALOG:-product_catalog}
-      POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
-    ports:
-      - '${DATABASE_PORT:-5432}:5432'
-    volumes:
-      - product-catalog-postgres-data:/var/lib/postgresql/data
-
   product-catalog-service:
     build:
       context: .
@@ -30,15 +17,16 @@ services:
       - .:/app
       - product_catalog_node_modules:/app/node_modules
       - pnpm_store:/pnpm/store
+    env_file:
+      - .env
     command: pnpm --filter product-catalog-service start:dev
     depends_on:
-      - product-catalog-postgres
+      - postgres-sql
 
 networks:
   vuhieu-network:
     name: vuhieu-network
 
 volumes:
-  product-catalog-postgres-data:
   pnpm_store:
     name: pnpm_store

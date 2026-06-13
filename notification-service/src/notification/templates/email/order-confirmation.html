@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận đơn hàng</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #2196F3;
+        }
+        .header h1 {
+            color: #2196F3;
+            margin: 0;
+            font-size: 32px;
+        }
+        .content {
+            padding: 30px 0;
+        }
+        .content h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .content p {
+            color: #666;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        .order-info {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .order-info p {
+            margin: 10px 0;
+        }
+        .highlight {
+            color: #2196F3;
+            font-weight: bold;
+        }
+        .button {
+            display: inline-block;
+            padding: 15px 40px;
+            background-color: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid #ddd;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Đơn Hàng Đã Được Xác Nhận!</h1>
+        </div>
+
+        <div class="content">
+            <h2>Cảm ơn bạn đã đặt hàng!</h2>
+
+            <p>Xin chào <span class="highlight">{{userName}}</span>,</p>
+
+            <p>Đơn hàng của bạn đã được xác nhận và đang được xử lý.</p>
+
+            <div class="order-info">
+                <p><strong>Mã đơn hàng:</strong> <span class="highlight">{{orderId}}</span></p>
+                <p><strong>Ngày đặt hàng:</strong> {{orderDate}}</p>
+                <p><strong>Tổng giá trị:</strong> <span class="highlight">{{totalAmount}} VNĐ</span></p>
+                <p><strong>Trạng thái:</strong> Đang xử lý</p>
+            </div>
+
+            <p>Chúng tôi sẽ thông báo cho bạn khi đơn hàng được giao cho đơn vị vận chuyển.</p>
+
+            <center>
+                <a href="{{orderUrl}}" class="button">Xem Chi Tiết Đơn Hàng</a>
+            </center>
+
+            <p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi.</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Scalable E-Commerce Platform. All rights reserved.</p>
+            <p>Email này được gửi tự động, vui lòng không trả lời.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -49,11 +49,13 @@ Tài liệu này mô tả kiến trúc tổng thể của hệ thống E-Commerc
 
 **Port:** 80
 **Chức năng:**
+
 - Single entry point cho tất cả public traffic
 - Rate limiting, security headers
 - Path rewriting từ friendly URLs sang gateway endpoints
 
 **Cấu hình:**
+
 ```nginx
 # Rate limit
 limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
@@ -84,6 +86,7 @@ location /shopping-carts/ {
 **Mục đích:** Orchestrate requests giữa multiple internal services
 
 **Cấu trúc code:**
+
 ```
 api-gateway-service/src/
 ├── main.ts                          # Bootstrap + ValidationPipe
@@ -100,19 +103,21 @@ api-gateway-service/src/
 ```
 
 **Pattern:**
+
 ```
-Controller (thin) 
+Controller (thin)
   ↓ calls
-Service (orchestration) 
+Service (orchestration)
   ↓ calls
-InternalSVCService (HTTP to nginx-private) 
+InternalSVCService (HTTP to nginx-private)
   ↓
-nginx-private 
+nginx-private
   ↓
 downstream service
 ```
 
 **Ví dụ orchestration:**
+
 ```typescript
 // User sign-up orchestrates 2 services:
 1. Create user in user-service
@@ -128,6 +133,7 @@ downstream service
 **Chức năng:** Internal service-to-service routing, hide topology
 
 **Upstreams:**
+
 ```nginx
 upstream user_service {
   server user-service:3003;
@@ -143,6 +149,7 @@ upstream product_catalog_service {
 ```
 
 **Routing:**
+
 ```nginx
 location /api/users/ {
   proxy_pass http://user_service;
@@ -158,6 +165,7 @@ location /api/product-catalog/ {
 ```
 
 **Lợi ích:**
+
 - Gateway không cần biết service địa chỉ thực
 - Có thể thay đổi port/hostname mà không update code
 - Centralized timeout, retry logic
@@ -169,6 +177,7 @@ location /api/product-catalog/ {
 #### **User Service (Port 3003, MongoDB)**
 
 **Endpoints:**
+
 ```
 GET  /api/users/health              # Health check
 POST /api/users/sign-up             # Register user
@@ -179,6 +188,7 @@ DELETE /api/users/:id               # Delete account
 ```
 
 **Data Model:**
+
 ```typescript
 User {
   _id: ObjectId
@@ -193,6 +203,7 @@ User {
 ```
 
 **Key Logic:**
+
 - Password hashed with bcrypt (salt=10)
 - Response transforms to SafeUser (no password)
 - Email conflict check → ConflictException
@@ -203,6 +214,7 @@ User {
 #### **Shopping Cart Service (Port 3002, MongoDB)**
 
 **Endpoints:**
+
 ```
 GET  /api/shopping-carts/health           # Health check
 POST /api/shopping-carts                  # Create cart
@@ -213,6 +225,7 @@ DELETE /api/shopping-carts/user/:userId   # Delete cart
 ```
 
 **Data Model:**
+
 ```typescript
 ShoppingCart {
   _id: ObjectId
@@ -226,6 +239,7 @@ ShoppingCart {
 ```
 
 **Key Logic:**
+
 - Idempotent create (return existing if found)
 - Add item: merge if productId exists, else push new
 - Update: replace entire items array
@@ -236,6 +250,7 @@ ShoppingCart {
 #### **Product Catalog Service (Port 3004, PostgreSQL)**
 
 **Endpoints:**
+
 ```
 # Categories
 POST /api/product-catalog/categories
@@ -253,6 +268,7 @@ DELETE /api/product-catalog/products/:id
 ```
 
 **Data Models:**
+
 ```typescript
 Category {
   id: UUID (PK)
@@ -280,11 +296,12 @@ Product {
 
 ---
 
-#### **Notification Service (Port 3005, Skeleton)**
+#### **Notification Service (Port 3005, RabbitMQ Worker)**
 
-**Trạng thái:** Scaffold mặc định NestJS
+**Trạng thái:** Consume notification event từ RabbitMQ, xử lý email/SMS theo channel
 **Hướng mở rộng:**
-- Event-driven (Kafka/RabbitMQ)
+
+- Event-driven qua RabbitMQ
 - Email/SMS/Push channels
 - Idempotency & retry
 
@@ -349,11 +366,13 @@ Response: { items: [...], updatedAt: ... }
 ### 4.1 MongoDB (user-service, shopping-cart-service)
 
 **Ưu điểm:**
+
 - Schema flexible
 - Tốc độ write cao
 - Dễ scale horizontally (sharding)
 
 **Nhược điểm:**
+
 - Không có transaction (version cũ)
 - Race condition risk khi concurrent updates
 - Không có foreign key constraints
@@ -363,12 +382,14 @@ Response: { items: [...], updatedAt: ... }
 ### 4.2 PostgreSQL (product-catalog-service)
 
 **Ưu điểm:**
+
 - ACID transactions
 - Referential integrity
 - Complex queries
 - Strong consistency
 
 **Nhược điểm:**
+
 - Schema rigid
 - Cần migration
 
@@ -404,11 +425,13 @@ Response (409 Conflict):
 ### 5.2 Gateway → Internal (Private)
 
 **Configuration:**
+
 ```
 NGINX_PRIVATE_HTTP_URL=http://nginx-private:8080
 ```
 
 **Pattern:**
+
 ```typescript
 async createUser(dto: CreateUserDto) {
   const response = await this.httpService.post(
@@ -420,6 +443,7 @@ async createUser(dto: CreateUserDto) {
 ```
 
 **Error Handling:**
+
 - Preserve downstream status code
 - Transform error messages
 - Throw HttpException
@@ -431,6 +455,7 @@ async createUser(dto: CreateUserDto) {
 ### Per-Service Variables
 
 **Common:**
+
 ```
 PORT=3000
 NODE_ENV=development
@@ -438,16 +463,19 @@ NGINX_PRIVATE_HTTP_URL=http://nginx-private:8080
 ```
 
 **user-service:**
+
 ```
 MONGODB_URI=mongodb://mongodb:27017/users
 ```
 
 **shopping-cart-service:**
+
 ```
 MONGODB_URI=mongodb://mongodb:27017/shopping-cart
 ```
 
 **product-catalog-service:**
+
 ```
 DATABASE_HOST=postgres
 DATABASE_PORT=5432
@@ -487,6 +515,7 @@ DATABASE_SYNC=true
 
 Current state: Simple email/password
 Future: Add JWT
+
 - AccessToken (15 min expiry)
 - RefreshToken (7 days)
 - Store in gateway or client
@@ -495,14 +524,14 @@ Future: Add JWT
 
 ## 8. Current Limitations
 
-| Issue | Impact | Priority |
-|-------|--------|----------|
-| No JWT auth | Can't verify user identity | High |
-| Race condition in cart | Concurrent adds broken | High |
-| No transactions | Data consistency risk | Medium |
-| No pagination | Performance issue | Medium |
-| Notification skeleton | Can't send notifications | Low |
-| No service discovery | Manual config | Low |
+| Issue                  | Impact                      | Priority |
+| ---------------------- | --------------------------- | -------- |
+| No JWT auth            | Can't verify user identity  | High     |
+| Race condition in cart | Concurrent adds broken      | High     |
+| No transactions        | Data consistency risk       | Medium   |
+| No pagination          | Performance issue           | Medium   |
+| Notification worker    | Message processing failures | Low      |
+| No service discovery   | Manual config               | Low      |
 
 ---
 
@@ -549,6 +578,7 @@ Future: Add JWT
 ## 10. Deployment Strategy
 
 ### Development (docker-compose.dev.yml):
+
 ```
 Services: nginx-public, api-gateway, nginx-private,
           user-service, shopping-cart-service
@@ -557,6 +587,7 @@ Network: Docker bridge (vuhieu-network)
 ```
 
 ### Production (Future):
+
 ```
 Proposed:
 - Kubernetes cluster
@@ -572,6 +603,7 @@ Proposed:
 ## 11. Troubleshooting
 
 ### 404 Errors:
+
 ```
 Check:
 1. Rewrite rule in nginx-public correct?
@@ -581,6 +613,7 @@ Check:
 ```
 
 ### 500 Errors:
+
 ```
 Check:
 1. Service logs: docker logs <service>
@@ -590,6 +623,7 @@ Check:
 ```
 
 ### Validation Errors:
+
 ```
 Check:
 1. DTO has decorators? (@IsEmail, @IsNotEmpty)

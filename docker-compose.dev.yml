@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 name: vuhieu
 
 include:
@@ -6,6 +6,39 @@ include:
   - path: ./nginx/docker-compose.dev.yml
   - path: ./shopping-cart-service/docker-compose.dev.yml
   - path: ./user-service/docker-compose.dev.yml
+  - path: ./notification-service/docker-compose.dev.yml
+
+services:
+  rabbitmq:
+    container_name: rabbitmq-dev
+    image: rabbitmq:3-management
+    ports:
+      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}" # AMQP port
+      - "${RABITTMQ_MANAGEMENT_PORT}:${RABITTMQ_MANAGEMENT_PORT}" # Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - vuhieu-network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  postgres-sql:
+    image: postgres:16-alpine
+    container_name: postgres-sql-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: super_admin
+      POSTGRES_PASSWORD: super_password_secret
+      POSTGRES_MULTIPLE_DATABASES: user_service:user_service_user:user_service_password,shopping_cart_service:shopping_cart_user:shopping_cart_password
+    ports:
+      - '${DATABASE_PORT:-5432}:5432'
+    networks:
+      - vuhieu-network
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-multiple-databases.sh:/docker-entrypoint-initdb.d/init-multiple-databases.sh
 
 networks:
   vuhieu-network:
@@ -14,3 +47,7 @@ networks:
 volumes:
   pnpm_store:
     name: pnpm_store
+  rabbitmq_data:
+    name: rabbitmq_data
+  postgres-data:
+    name: postgres-data

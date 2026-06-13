@@ -15,18 +15,18 @@ export class Category {
   id!: string;
 
   @Index({ unique: true })
-  @Column({ type: 'nvarchar', length: 150 })
+  @Column({ type: 'varchar', length: 150 })
   name!: string;
 
-  @Column({ type: 'ntext', nullable: true })
+  @Column({ type: 'text', nullable: true })
   description?: string | null;
 
   @OneToMany(() => Product, (product) => product.category)
   products!: Product[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'date' })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'date' })
   updatedAt!: Date;
 }

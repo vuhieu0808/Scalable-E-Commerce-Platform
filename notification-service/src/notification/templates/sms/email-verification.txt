@@ -1,0 +1,1 @@
+Ma xac thuc email cua ban la: {{verificationCode}}. Ma co hieu luc trong {{expiryMinutes}} phut.
