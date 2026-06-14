@@ -4,8 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    args:
-      NOTIFICATION_SERVICE_PORT: ${NOTIFICATION_SERVICE_PORT:-3005}
+      args:
+        NOTIFICATION_SERVICE_PORT: ${NOTIFICATION_SERVICE_PORT:-3005}
     ports:
       - "${NOTIFICATION_SERVICE_PORT}:${NOTIFICATION_SERVICE_PORT}"
     environment:
@@ -22,6 +22,7 @@ services:
       - vuhieu-network
     depends_on:
       - rabbitmq
+      - api-gateway-service
     command: pnpm run start:dev
 
 networks:

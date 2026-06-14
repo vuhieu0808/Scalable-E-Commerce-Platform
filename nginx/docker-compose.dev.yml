@@ -12,8 +12,6 @@ services:
       - vuhieu-network
     depends_on:
       - api-gateway-service
-      - shopping-cart-service
-      - user-service
 
   nginx-private:
     build:
@@ -28,7 +26,6 @@ services:
       - vuhieu-network
     depends_on:
     - api-gateway-service
-    - shopping-cart-service
 
 networks:
   vuhieu-network:

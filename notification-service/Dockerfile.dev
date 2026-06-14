@@ -4,15 +4,22 @@ ARG NOTIFICATION_SERVICE_PORT
 
 ENV PORT=${NOTIFICATION_SERVICE_PORT:-3005}
 
-WORKDIR /app
-
 RUN npm install -g pnpm
 
+WORKDIR /app
+
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+RUN pnpm config set store-dir /pnpm/store
+
 COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install --ignore-scripts
+RUN pnpm approve-builds @nestjs/core unrs-resolver
 RUN pnpm install
 
 COPY . .
 
-EXPOSE ${PORT}
+EXPOSE $PORT
 
 CMD ["pnpm", "run", "start:dev"]

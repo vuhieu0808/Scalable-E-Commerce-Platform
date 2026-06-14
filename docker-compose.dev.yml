@@ -2,11 +2,13 @@ version: "3.8"
 name: vuhieu
 
 include:
-  - path: ./api-gateway-service/docker-compose.dev.yml
-  - path: ./nginx/docker-compose.dev.yml
   - path: ./shopping-cart-service/docker-compose.dev.yml
   - path: ./user-service/docker-compose.dev.yml
   - path: ./notification-service/docker-compose.dev.yml
+  - path: ./product-catalog-service/docker-compose.dev.yml
+
+  - path: ./api-gateway-service/docker-compose.dev.yml
+  - path: ./nginx/docker-compose.dev.yml
 
 services:
   rabbitmq:
@@ -28,10 +30,10 @@ services:
     container_name: postgres-sql-dev
     restart: unless-stopped
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: super_admin
-      POSTGRES_PASSWORD: super_password_secret
-      POSTGRES_MULTIPLE_DATABASES: user_service:user_service_user:user_service_password,shopping_cart_service:shopping_cart_user:shopping_cart_password
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-super_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-super_password_secret}
+      POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_MULTIPLE_DATABASES}
     ports:
       - '${DATABASE_PORT:-5432}:5432'
     networks:

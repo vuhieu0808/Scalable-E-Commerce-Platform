@@ -16,8 +16,9 @@ import { SendNotificationRequestDto } from '../internal-svc/dto/request/notifica
 export class ApiGatewayService {
   constructor(private readonly internalSVCService: InternalSVCService) {}
 
-  signUpUser(signUpRequestDto: SignUpRequestDto) {
-    return this.internalSVCService.signUpUser(signUpRequestDto);
+  async signUpUser(signUpRequestDto: SignUpRequestDto) {
+    const user = await this.internalSVCService.signUpUser(signUpRequestDto);
+    return user;
   }
 
   signInUser(signInRequestDto: SignInRequestDto) {

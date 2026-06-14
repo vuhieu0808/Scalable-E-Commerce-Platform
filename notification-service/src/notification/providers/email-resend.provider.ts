@@ -40,6 +40,7 @@ export class EmailResendProvider implements NotificationProvider {
 
       // Lấy subject và HTML body từ template
       const subject = this.templateService.getEmailSubject(type, data);
+      console.log(`Generated email subject for type ${type}: ${subject}`);
       const htmlBody = this.templateService.getEmailTemplate(type, data);
 
       this.logger.log(`Sending email to ${recipient}, type: ${type}`);
@@ -53,7 +54,7 @@ export class EmailResendProvider implements NotificationProvider {
 
       if (error) {
         this.logger.error(
-          `Failed to send email to ${recipient}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          `Failed to send email to ${recipient}: ${error.message || error}`,
         );
         return {
           success: false,

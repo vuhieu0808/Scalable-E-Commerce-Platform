@@ -22,6 +22,8 @@ services:
     depends_on:
       - shopping-cart-service
       - user-service
+      - product-catalog-service
+      - rabbitmq
 
 
 networks:

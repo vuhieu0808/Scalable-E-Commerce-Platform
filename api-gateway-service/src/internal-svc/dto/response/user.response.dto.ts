@@ -1,5 +1,5 @@
 export type UserResponseDto = {
-  _id: string;
+  id: string;
   email: string;
   name?: string;
   address?: string;

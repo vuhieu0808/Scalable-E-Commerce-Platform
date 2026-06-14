@@ -18,6 +18,7 @@ import {
   SignUpRequestDto,
   UpdateUserRequestDto,
 } from '../internal-svc/dto/request/user.request.dto';
+import { UserResponseDto } from '../internal-svc/dto/response/user.response.dto';
 
 @Controller('api-gateway')
 export class ApiGatewayController {
@@ -27,17 +28,30 @@ export class ApiGatewayController {
 
   @Post('users/sign-up')
   async signUp(@Body() signUpRequestDto: SignUpRequestDto) {
-    const user = await this.apiGatewayService.signUpUser(signUpRequestDto);
+    console.log('Received sign-up request:', signUpRequestDto);
+    const user: UserResponseDto = await this.apiGatewayService.signUpUser(signUpRequestDto);
+    console.log('User created successfully:', user);
 
     await this.apiGatewayService.createShoppingCart({
-      userId: user._id,
+      userId: user.id,
     });
+    
+    await this.apiGatewayService.sendNotification({
+      channel: 'email',
+      // recipient: user.email,
+      recipient: "minhhieuvutran046@gmail.com",
+      type: 'welcome',
+      data: { userName: user.name ?? 'Valued Customer' },
+    });
+
+    console.log('Welcome notification sent successfully to:', user);
 
     return user;
   }
 
   @Get('users/health')
   async checkHealthForUser() {
+    console.log('Checking health for User Service...');
     return this.apiGatewayService.checkHealthForUser();
   }
 

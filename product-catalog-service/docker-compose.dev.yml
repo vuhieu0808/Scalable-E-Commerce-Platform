@@ -28,5 +28,6 @@ networks:
     name: vuhieu-network
 
 volumes:
+  product_catalog_node_modules:
   pnpm_store:
     name: pnpm_store

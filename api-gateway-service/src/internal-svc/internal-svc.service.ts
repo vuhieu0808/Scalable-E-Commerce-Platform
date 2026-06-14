@@ -146,6 +146,7 @@ export class InternalSVCService {
   createShoppingCart(
     createShoppingCartRequestDto: CreateShoppingCartRequestDto,
   ) {
+    console.log('Creating shopping cart for user:', createShoppingCartRequestDto.userId);
     return this.request('/api/shopping-carts', {
       method: 'POST',
       body: createShoppingCartRequestDto,

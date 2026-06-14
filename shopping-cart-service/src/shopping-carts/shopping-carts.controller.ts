@@ -23,6 +23,7 @@ export class ShoppingCartsController {
 
   @Post()
   createShoppingCart(@Body() createShoppingCartDto: CreateShoppingCartDto) {
+    console.log("Received request to create shopping cart for user:", createShoppingCartDto.userId);
     return this.shoppingCartsService.createShoppingCart(createShoppingCartDto);
   }
 
